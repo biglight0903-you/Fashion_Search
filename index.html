@@ -1,501 +1,605 @@
-
 <!DOCTYPE html>
 <html lang="ja">
 <head>
+
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>Fashion AI OS</title>
-
-<link rel="manifest" href="manifest.json">
-<meta name="theme-color" content="#111111">
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+<title>AI Fashion Search OS Ultimate</title>
 
 <style>
-body{
-margin:0;
-padding:0;
-font-family:sans-serif;
-background:#f4f4f4;
-color:#111;
-}
 
-header{
-background:#111;
-color:white;
-padding:20px;
-font-size:24px;
-font-weight:bold;
-text-align:center;
-position:sticky;
-top:0;
-z-index:100;
+body{
+    margin:0;
+    padding:20px;
+    background:#f4f7f6;
+    font-family:sans-serif;
+    color:#333;
 }
 
 .container{
-padding:15px;
-max-width:900px;
-margin:auto;
+    max-width:1200px;
+    margin:auto;
+    background:white;
+    padding:25px;
+    border-radius:16px;
+    box-shadow:0 4px 15px rgba(0,0,0,0.1);
 }
 
-.card{
-background:white;
-border-radius:16px;
-padding:18px;
-margin-top:15px;
-box-shadow:0 4px 12px rgba(0,0,0,0.08);
+h1{
+    margin-top:0;
+    color:#2c3e50;
 }
 
-.big-btn{
-width:100%;
-padding:18px;
-font-size:18px;
-font-weight:bold;
-border:none;
-border-radius:14px;
-margin-top:12px;
-cursor:pointer;
-background:#111;
-color:white;
+h2{
+    margin-top:40px;
+    border-left:6px solid #27ae60;
+    padding-left:10px;
+    color:#2c3e50;
 }
 
-.big-btn:hover{
-opacity:0.92;
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:12px;
+    background:#27ae60;
+    color:white;
+    font-size:16px;
+    font-weight:bold;
+    cursor:pointer;
 }
 
-input[type="file"]{
-width:100%;
-margin-top:15px;
+button:hover{
+    opacity:0.9;
 }
 
-img{
-width:100%;
-border-radius:14px;
-margin-top:15px;
+.result{
+    margin-top:20px;
+    padding:18px;
+    border-radius:12px;
+    background:#fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.06);
 }
 
-.result-title{
-font-size:22px;
-font-weight:bold;
-margin-bottom:10px;
+.good{
+    border-left:8px solid #27ae60;
 }
 
-.result-text{
-line-height:1.8;
-white-space:pre-wrap;
+.bad{
+    border-left:8px solid #e74c3c;
 }
 
-.grid{
-display:grid;
-grid-template-columns:1fr 1fr;
-gap:10px;
-margin-top:15px;
+.normal{
+    border-left:8px solid #f1c40f;
+}
+
+.ai-box{
+    border-left:8px solid #3498db;
+    background:#eef7ff;
+}
+
+.upload-buttons{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:10px;
+    margin-top:15px;
+}
+
+.link-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(200px,1fr));
+    gap:10px;
+    margin-top:20px;
 }
 
 .link-btn{
-display:block;
-text-align:center;
-padding:14px;
-background:#222;
-color:white;
-text-decoration:none;
-border-radius:12px;
-font-weight:bold;
+    display:block;
+    text-align:center;
+    text-decoration:none;
+    padding:14px;
+    border-radius:10px;
+    background:#34495e;
+    color:white;
+    font-weight:bold;
 }
 
-.history-item{
-padding:12px;
-border-bottom:1px solid #eee;
+.link-btn:hover{
+    opacity:0.9;
+}
+
+.preview-box{
+    margin-top:20px;
+    text-align:center;
+}
+
+.preview-box img{
+    width:100%;
+    max-width:450px;
+    border-radius:14px;
+    box-shadow:0 4px 12px rgba(0,0,0,0.15);
+}
+
+.history-card{
+    margin-top:15px;
+    padding:15px;
+    border-radius:10px;
+    background:#fafafa;
+    border:1px solid #ddd;
+}
+
+.history-card img{
+    width:100%;
+    max-width:200px;
+    border-radius:10px;
+    margin-top:10px;
 }
 
 .small{
-font-size:12px;
-color:#666;
+    font-size:12px;
+    color:#666;
 }
 
-.loading{
-animation:pulse 1s infinite;
-}
-
-@keyframes pulse{
-0%{opacity:1;}
-50%{opacity:0.5;}
-100%{opacity:1;}
-}
 </style>
-</head>
-<body>
 
-<header>
-Fashion AI OS
-</header>
+</head>
+
+<body>
 
 <div class="container">
 
-<div class="card">
-
-<h2>📷 撮影 / 画像解析</h2>
+<h1>AI Fashion Search OS Ultimate</h1>
 
 <p>
-服・タグ・型番・バーコードを撮影してください。
+服・タグ・型番・ブランドをAI解析して検索＆保存する万能ツール
 </p>
 
-<input
-id="cameraInput"
-type="file"
-accept="image/*"
-capture="environment">
+<h2>① 画像検索</h2>
 
-<button class="big-btn" onclick="analyzeImage()">
-AI解析スタート
-</button>
+<div class="upload-buttons">
 
-<img id="preview" style="display:none;">
+    <button onclick="openCamera()">
+        📷 カメラ撮影
+    </button>
+
+    <button onclick="openGallery()">
+        🖼️ 画像を選択
+    </button>
 
 </div>
 
-<div id="resultArea"></div>
+<input
+    type="file"
+    id="cameraInput"
+    accept="image/*"
+    capture="environment"
+    style="display:none"
+>
 
-<div class="card">
+<input
+    type="file"
+    id="galleryInput"
+    accept="image/*"
+    style="display:none"
+>
 
-<h2>💾 保存履歴</h2>
+<div class="preview-box">
+
+    <img
+        id="previewImage"
+        style="display:none"
+    >
+
+</div>
+
+<div id="searchResult"></div>
+
+<h2>② 保存履歴</h2>
+
+<button onclick="loadHistory()">
+履歴読み込み
+</button>
 
 <div id="historyArea"></div>
-
-<button class="big-btn" onclick="clearHistory()">
-履歴削除
-</button>
-
-</div>
 
 </div>
 
 <script>
 
-// =============================
-// Gemini API
-// =============================
+// =================================================
+// API設定
+// =================================================
 
 const API_KEY = "AIzaSyB_AROtYa2U15rlIwaW9IDzglmlqahJ1ac";
+
 const MODEL = "gemini-2.5-flash";
 
-// =============================
-// プレビュー
-// =============================
+// =================================================
+// カメラ
+// =================================================
 
-const cameraInput = document.getElementById("cameraInput");
-const preview = document.getElementById("preview");
+function openCamera(){
 
-cameraInput.addEventListener("change",()=>{
-
-const file = cameraInput.files[0];
-
-if(!file) return;
-
-preview.src = URL.createObjectURL(file);
-preview.style.display = "block";
-
-});
-
-// =============================
-// OCR
-// =============================
-
-async function runOCR(file){
-
-try{
-
-const result = await Tesseract.recognize(file,'eng+jpn');
-
-return result.data.text || "";
-
-}catch(err){
-
-console.log(err);
-return "";
+    document
+    .getElementById("cameraInput")
+    .click();
 
 }
+
+// =================================================
+// ギャラリー
+// =================================================
+
+function openGallery(){
+
+    document
+    .getElementById("galleryInput")
+    .click();
+
 }
 
-// =============================
-// Gemini解析
-// =============================
+// =================================================
+// イベント
+// =================================================
 
-async function askGemini(base64,mimeType,ocrText){
+document
+.getElementById("cameraInput")
+.addEventListener("change", handleImage);
 
-const url = `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`;
+document
+.getElementById("galleryInput")
+.addEventListener("change", handleImage);
 
-const prompt = `
-あなたはファッション商品解析AIです。
+// =================================================
+// 画像処理
+// =================================================
 
-画像から以下を推定してください。
+async function handleImage(event){
 
-・ブランド名
-・商品名
-・カテゴリ
-・色
-・特徴
-・型番
-・推定価格
-・検索用キーワード
+    const file =
+        event.target.files[0];
 
-OCR結果:
-${ocrText}
+    if(!file){
+        return;
+    }
 
-最後に必ず以下形式で出力してください。
+    // =========================
+    // プレビュー
+    // =========================
 
-【検索キーワード】
-xxxxx
-`;
+    const preview =
+        document.getElementById("previewImage");
 
-const response = await fetch(url,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body:JSON.stringify({
-contents:[{
-parts:[
-{text:prompt},
-{
-inlineData:{
-mimeType:mimeType,
-data:base64
+    preview.src =
+        URL.createObjectURL(file);
+
+    preview.style.display =
+        "block";
+
+    // =========================
+    // Loading
+    // =========================
+
+    document.getElementById("searchResult")
+    .innerHTML = `
+        <div class="result normal">
+            AI解析中...
+        </div>
+    `;
+
+    try{
+
+        // =========================
+        // Base64
+        // =========================
+
+        const base64 =
+            await fileToBase64(file);
+
+        // =========================
+        // Gemini API
+        // =========================
+
+        const response =
+            await fetch(
+                `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
+                {
+
+                    method:"POST",
+
+                    headers:{
+                        "Content-Type":"application/json"
+                    },
+
+                    body:JSON.stringify({
+
+                        contents:[{
+
+                            parts:[
+
+                                {
+
+                                    text:`
+                                    この画像を解析してください。
+
+                                    以下を可能な限り推定してください。
+
+                                    ・ブランド名
+                                    ・商品名
+                                    ・カテゴリ
+                                    ・型番
+                                    ・カラー
+                                    ・特徴
+                                    ・定価予想
+                                    ・中古相場
+                                    ・検索用キーワード
+
+                                    最後に
+                                    「検索キーワード」
+                                    を必ず出力してください。
+                                    `
+
+                                },
+
+                                {
+
+                                    inlineData:{
+                                        mimeType:file.type,
+                                        data:base64
+                                    }
+
+                                }
+
+                            ]
+
+                        }]
+
+                    })
+
+                }
+            );
+
+        const data =
+            await response.json();
+
+        console.log(data);
+
+        const text =
+            data.candidates?.[0]
+            ?.content?.parts?.[0]
+            ?.text
+            || "解析失敗";
+
+        // =========================
+        // 検索リンク
+        // =========================
+
+        const keyword =
+            encodeURIComponent(text);
+
+        // =========================
+        // 表示
+        // =========================
+
+        document.getElementById("searchResult")
+        .innerHTML = `
+
+            <div class="result ai-box">
+
+                <h2>AI解析結果</h2>
+
+                <div style="
+                    white-space:pre-wrap;
+                    line-height:1.8;
+                ">
+                    ${text}
+                </div>
+
+                <div class="link-grid">
+
+                    <a
+                        class="link-btn"
+                        target="_blank"
+                        href="https://zozo.jp/search/?p_keyv=${keyword}"
+                    >
+                        ZOZOTOWN
+                    </a>
+
+                    <a
+                        class="link-btn"
+                        target="_blank"
+                        href="https://search.rakuten.co.jp/search/mall/${keyword}/"
+                    >
+                        楽天
+                    </a>
+
+                    <a
+                        class="link-btn"
+                        target="_blank"
+                        href="https://www.amazon.co.jp/s?k=${keyword}"
+                    >
+                        Amazon
+                    </a>
+
+                    <a
+                        class="link-btn"
+                        target="_blank"
+                        href="https://www.google.com/search?tbm=shop&q=${keyword}"
+                    >
+                        Google Shopping
+                    </a>
+
+                    <a
+                        class="link-btn"
+                        target="_blank"
+                        href="https://jp.mercari.com/search?keyword=${keyword}"
+                    >
+                        メルカリ
+                    </a>
+
+                    <a
+                        class="link-btn"
+                        target="_blank"
+                        href="https://paypayfleamarket.yahoo.co.jp/search/${keyword}"
+                    >
+                        PayPayフリマ
+                    </a>
+
+                </div>
+
+            </div>
+
+        `;
+
+        // =========================
+        // 保存
+        // =========================
+
+        saveHistory(
+            text,
+            preview.src
+        );
+
+    }catch(error){
+
+        console.error(error);
+
+        document.getElementById("searchResult")
+        .innerHTML = `
+
+            <div class="result bad">
+
+                <h2>AI解析エラー</h2>
+
+                <p>
+                    ${error.message}
+                </p>
+
+            </div>
+
+        `;
+
+    }
+
 }
-}
-]
-}],
-generationConfig:{
-temperature:0.4,
-maxOutputTokens:4096
-}
-})
-});
 
-const data = await response.json();
+// =================================================
+// Base64
+// =================================================
 
-return data.candidates?.[0]?.content?.parts?.[0]?.text || "解析失敗";
-}
+function fileToBase64(file){
 
-// =============================
-// AI解析開始
-// =============================
+    return new Promise((resolve,reject)=>{
 
-async function analyzeImage(){
+        const reader =
+            new FileReader();
 
-const file = cameraInput.files[0];
+        reader.readAsDataURL(file);
 
-if(!file){
-alert("画像を選択してください");
-return;
-}
+        reader.onload = ()=>{
 
-const resultArea = document.getElementById("resultArea");
+            const result =
+                reader.result
+                .split(",")[1];
 
-resultArea.innerHTML = `
-<div class="card loading">
-<h2>AI解析中...</h2>
-<p>ブランド・商品・価格を解析しています</p>
-</div>
-`;
+            resolve(result);
 
-const ocrText = await runOCR(file);
+        };
 
-const reader = new FileReader();
+        reader.onerror =
+            error => reject(error);
 
-reader.onload = async function(){
+    });
 
-const base64 = reader.result.split(',')[1];
-
-const aiResult = await askGemini(base64,file.type,ocrText);
-
-const keyword = extractKeyword(aiResult);
-
-showResult(aiResult,keyword,reader.result);
-
-saveHistory(aiResult,keyword,reader.result);
-
-};
-
-reader.readAsDataURL(file);
 }
 
-// =============================
-// 検索キーワード抽出
-// =============================
+// =================================================
+// 保存
+// =================================================
 
-function extractKeyword(text){
+function saveHistory(text,image){
 
-const match = text.match(/【検索キーワード】([\s\S]*)/);
+    const history = JSON.parse(
+        localStorage.getItem("fashion_history")
+        || "[]"
+    );
 
-if(match){
-return match[1].trim();
+    history.unshift({
+
+        text:text,
+
+        image:image,
+
+        date:new Date().toLocaleString()
+
+    });
+
+    localStorage.setItem(
+        "fashion_history",
+        JSON.stringify(history)
+    );
+
 }
 
-return "fashion item";
-}
-
-// =============================
-// 結果表示
-// =============================
-
-function showResult(text,keyword,image){
-
-const encoded = encodeURIComponent(keyword);
-
-const zozo = `https://zozo.jp/search/?p_keyv=${encoded}`;
-const rakuten = `https://search.rakuten.co.jp/search/mall/${encoded}/`;
-const amazon = `https://www.amazon.co.jp/s?k=${encoded}`;
-const mercari = `https://jp.mercari.com/search?keyword=${encoded}`;
-const google = `https://www.google.com/search?tbm=shop&q=${encoded}`;
-
-const resultArea = document.getElementById("resultArea");
-
-resultArea.innerHTML = `
-<div class="card">
-
-<div class="result-title">
-AI解析結果
-</div>
-
-<img src="${image}">
-
-<div class="result-text">
-${text.replace(/\n/g,'<br>')}
-</div>
-
-<div class="grid">
-
-<a class="link-btn" target="_blank" href="${zozo}">
-ZOZO
-</a>
-
-<a class="link-btn" target="_blank" href="${rakuten}">
-楽天
-</a>
-
-<a class="link-btn" target="_blank" href="${amazon}">
-Amazon
-</a>
-
-<a class="link-btn" target="_blank" href="${mercari}">
-メルカリ
-</a>
-
-</div>
-
-<div class="grid">
-
-<a class="link-btn" target="_blank" href="${google}">
-Google Shopping
-</a>
-
-<button class="big-btn" onclick="copyKeyword('${keyword.replace(/'/g,'')}')">
-検索キーワードコピー
-</button>
-
-</div>
-
-</div>
-`;
-}
-
-// =============================
-// コピー
-// =============================
-
-function copyKeyword(keyword){
-
-navigator.clipboard.writeText(keyword);
-
-alert("コピーしました");
-}
-
-// =============================
-// 履歴保存
-// =============================
-
-function saveHistory(result,keyword,image){
-
-let history = JSON.parse(localStorage.getItem("fashion_history") || "[]");
-
-history.unshift({
-result,
-keyword,
-image,
-date:new Date().toLocaleString()
-});
-
-history = history.slice(0,50);
-
-localStorage.setItem("fashion_history",JSON.stringify(history));
-
-loadHistory();
-}
-
-// =============================
+// =================================================
 // 履歴表示
-// =============================
+// =================================================
 
 function loadHistory(){
 
-const historyArea = document.getElementById("historyArea");
+    const area =
+        document.getElementById("historyArea");
 
-const history = JSON.parse(localStorage.getItem("fashion_history") || "[]");
+    const history = JSON.parse(
+        localStorage.getItem("fashion_history")
+        || "[]"
+    );
 
-if(!history.length){
+    if(!history.length){
 
-historyArea.innerHTML = `
-<p class="small">履歴なし</p>
-`;
+        area.innerHTML = `
+            <div class="result bad">
+                履歴なし
+            </div>
+        `;
 
-return;
+        return;
+
+    }
+
+    area.innerHTML = "";
+
+    history.forEach(item=>{
+
+        const div =
+            document.createElement("div");
+
+        div.className =
+            "history-card";
+
+        div.innerHTML = `
+
+            <div class="small">
+                ${item.date}
+            </div>
+
+            <img src="${item.image}">
+
+            <div style="
+                margin-top:10px;
+                white-space:pre-wrap;
+                line-height:1.7;
+            ">
+                ${item.text}
+            </div>
+
+        `;
+
+        area.appendChild(div);
+
+    });
+
 }
-
-historyArea.innerHTML = history.map(item=>`
-
-<div class="history-item">
-
-<img src="${item.image}">
-
-<p><strong>${item.keyword}</strong></p>
-
-<p class="small">${item.date}</p>
-
-</div>
-
-`).join('');
-}
-
-// =============================
-// 履歴削除
-// =============================
-
-function clearHistory(){
-
-if(confirm("履歴削除しますか？")){
-
-localStorage.removeItem("fashion_history");
-
-loadHistory();
-
-}
-}
-
-// =============================
-// PWA
-// =============================
-
-if('serviceWorker' in navigator){
-window.addEventListener('load',()=>{
-navigator.serviceWorker.register('./sw.js');
-});
-}
-
-loadHistory();
 
 </script>
 

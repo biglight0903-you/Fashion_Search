@@ -1,3 +1,4 @@
+```html
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -5,7 +6,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Fashion AI OS</title>
+<title>Fashion AI Lens</title>
 
 <style>
 
@@ -181,6 +182,10 @@ font-size:14px;
 color:#666;
 }
 
+small{
+color:#777;
+}
+
 </style>
 
 </head>
@@ -191,7 +196,7 @@ color:#666;
 
 <div class="card">
 
-<h1>Fashion AI OS</h1>
+<h1>Fashion AI Lens</h1>
 
 <p>
 服・ブランド・型番解析特化
@@ -206,7 +211,7 @@ color:#666;
 <h2>STEP1：入力</h2>
 
 <div class="step">
-まず画像取得または検索ワード入力
+タグ撮影 or 保存画像 or 型番入力
 </div>
 
 <input
@@ -275,20 +280,37 @@ class="preview">
 <h2>STEP2：解析</h2>
 
 <div class="step">
-画像選択後に使用
+
+タグ画像ならOCR推奨。<br>
+商品画像ならAI解析推奨。
+
 </div>
 
 <div class="grid">
 
 <button
-id="ocrBtn"
+id="ocrFastBtn"
 class="ai-btn"
-onclick="readOCR()"
+onclick="readOCRFast()"
 disabled>
 
-🔤 タグ/文字を読む
+🔤 型番OCR
 
 </button>
+
+<button
+id="ocrJpnBtn"
+class="ai-btn"
+onclick="readOCRJapanese()"
+disabled>
+
+🈯 日本語OCR
+
+</button>
+
+</div>
+
+<div class="grid">
 
 <button
 id="aiBtn"
@@ -297,6 +319,14 @@ onclick="analyzeImage()"
 disabled>
 
 🧠 AIで商品特定
+
+</button>
+
+<button
+class="save-btn"
+onclick="saveHistory()">
+
+⭐ 保存
 
 </button>
 
@@ -321,18 +351,18 @@ class="result good">
 <div class="grid">
 
 <button
-class="save-btn"
-onclick="saveHistory()">
+class="clear-btn"
+onclick="clearAll()">
 
-⭐ 保存
+🗑 オールクリア
 
 </button>
 
 <button
 class="clear-btn"
-onclick="clearAll()">
+onclick="clearHistory()">
 
-🗑 オールクリア
+🧹 履歴削除
 
 </button>
 
@@ -369,16 +399,8 @@ onclick="captureCamera()">
 
 <script>
 
-// ======================================
-// Worker URL
-// ======================================
-
 const WORKER_URL =
-"https://chanfana-openapi-template.big-light-0903.workers.dev";
-
-// ======================================
-// State
-// ======================================
+"https://YOUR-WORKER.workers.dev";
 
 let currentScanner = null;
 
@@ -386,7 +408,11 @@ let currentScanner = null;
 // Gemini
 // ======================================
 
-async function askGemini(prompt, base64=null, mimeType=null){
+async function askGemini(
+prompt,
+base64=null,
+mimeType=null
+){
 
 const parts = [
 {
@@ -397,10 +423,12 @@ text:prompt
 if(base64){
 
 parts.push({
+
 inlineData:{
 mimeType:mimeType,
 data:base64
 }
+
 });
 
 }
@@ -427,7 +455,7 @@ generationConfig:{
 temperature:0.7,
 topP:0.95,
 topK:40,
-maxOutputTokens:4096
+maxOutputTokens:2048
 }
 
 })
@@ -464,6 +492,83 @@ return text;
 }
 
 // ======================================
+// Image Compress
+// ======================================
+
+async function compressImage(file){
+
+return new Promise((resolve)=>{
+
+const img = new Image();
+
+const reader = new FileReader();
+
+reader.onload = e=>{
+
+img.src = e.target.result;
+
+};
+
+img.onload = ()=>{
+
+const canvas =
+document.createElement("canvas");
+
+const maxSize = 1200;
+
+let width = img.width;
+let height = img.height;
+
+if(width > height){
+
+if(width > maxSize){
+
+height *= maxSize / width;
+width = maxSize;
+
+}
+
+}else{
+
+if(height > maxSize){
+
+width *= maxSize / height;
+height = maxSize;
+
+}
+
+}
+
+canvas.width = width;
+canvas.height = height;
+
+const ctx =
+canvas.getContext("2d");
+
+ctx.drawImage(
+img,
+0,
+0,
+width,
+height
+);
+
+resolve(
+canvas.toDataURL(
+"image/jpeg",
+0.7
+)
+);
+
+};
+
+reader.readAsDataURL(file);
+
+});
+
+}
+
+// ======================================
 // Search
 // ======================================
 
@@ -482,6 +587,9 @@ return;
 
 }
 
+const q =
+encodeURIComponent(keyword);
+
 showResult(`
 
 <h2>${keyword}</h2>
@@ -491,42 +599,42 @@ showResult(`
 <a
 class="link-btn"
 target="_blank"
-href="https://zozo.jp/search/?p_keyv=${keyword}">
+href="https://zozo.jp/search/?p_keyv=${q}">
 ZOZO
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://www.buyma.com/r/_${keyword}/">
+href="https://www.buyma.com/r/_${q}/">
 BUYMA
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://jp.mercari.com/search?keyword=${keyword}">
+href="https://jp.mercari.com/search?keyword=${q}">
 メルカリ
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://search.rakuten.co.jp/search/mall/${keyword}/">
+href="https://search.rakuten.co.jp/search/mall/${q}/">
 楽天
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://www.amazon.co.jp/s?k=${keyword}">
+href="https://www.amazon.co.jp/s?k=${q}">
 Amazon
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://www.google.com/search?q=${keyword}">
+href="https://www.google.com/search?q=${q}">
 Google
 </a>
 
@@ -550,6 +658,8 @@ input.setAttribute(
 "environment"
 );
 
+input.accept = "image/*";
+
 input.click();
 
 }
@@ -560,25 +670,14 @@ input.click();
 
 window.pickImage = function(){
 
-const oldInput =
+const input =
 document.getElementById("imageInput");
 
-const newInput =
-oldInput.cloneNode(true);
+input.removeAttribute("capture");
 
-newInput.removeAttribute("capture");
+input.accept = "image/*";
 
-oldInput.parentNode.replaceChild(
-newInput,
-oldInput
-);
-
-newInput.click();
-
-newInput.addEventListener(
-"change",
-handleImagePreview
-);
+input.click();
 
 }
 
@@ -615,13 +714,17 @@ handleImagePreview
 );
 
 // ======================================
-// Enable Buttons
+// Enable
 // ======================================
 
 function enableAnalyzeButtons(){
 
 document
-.getElementById("ocrBtn")
+.getElementById("ocrFastBtn")
+.disabled = false;
+
+document
+.getElementById("ocrJpnBtn")
 .disabled = false;
 
 document
@@ -688,8 +791,7 @@ showError(
 // OCR
 // ======================================
 
-window.readOCR =
-async function(){
+async function runOCR(lang){
 
 const file =
 document.getElementById("imageInput")
@@ -709,10 +811,13 @@ showLoading(
 
 try{
 
+const compressed =
+await compressImage(file);
+
 const result =
 await Tesseract.recognize(
-file,
-"jpn+eng"
+compressed,
+lang
 );
 
 const text =
@@ -726,9 +831,25 @@ showAI(text);
 
 }catch(err){
 
-showError(err.message);
+showError(
+"OCR失敗：" + err.message
+);
 
 }
+
+}
+
+window.readOCRFast =
+async function(){
+
+await runOCR("eng");
+
+}
+
+window.readOCRJapanese =
+async function(){
+
+await runOCR("jpn+eng");
 
 }
 
@@ -755,17 +876,13 @@ showLoading(
 "AI解析中..."
 );
 
-const reader =
-new FileReader();
-
-reader.onload =
-async function(){
-
 try{
 
+const compressed =
+await compressImage(file);
+
 const base64 =
-reader.result
-.split(",")[1];
+compressed.split(",")[1];
 
 const prompt = `
 
@@ -786,20 +903,18 @@ const result =
 await askGemini(
 prompt,
 base64,
-file.type
+"image/jpeg"
 );
 
 showAI(result);
 
 }catch(err){
 
-showError(err.message);
+showError(
+"AI解析失敗：" + err.message
+);
 
 }
-
-};
-
-reader.readAsDataURL(file);
 
 }
 
@@ -896,6 +1011,22 @@ ${item.text.substring(0,180)}
 }
 
 // ======================================
+// Clear History
+// ======================================
+
+window.clearHistory = function(){
+
+localStorage.removeItem(
+"fashion_history"
+);
+
+loadHistory();
+
+alert("履歴削除完了");
+
+}
+
+// ======================================
 // Clear
 // ======================================
 
@@ -924,7 +1055,11 @@ preview.style.display =
 "none";
 
 document
-.getElementById("ocrBtn")
+.getElementById("ocrFastBtn")
+.disabled = true;
+
+document
+.getElementById("ocrJpnBtn")
 .disabled = true;
 
 document
@@ -955,7 +1090,7 @@ currentScanner = null;
 }
 
 // ======================================
-// Reader Clear
+// Reader
 // ======================================
 
 function clearReader(){
@@ -1033,3 +1168,4 @@ loadHistory();
 
 </body>
 </html>
+```

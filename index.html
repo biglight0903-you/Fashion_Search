@@ -5,28 +5,26 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width,initial-scale=1.0">
 
-<title>Universal AI Life OS</title>
-
-<meta name="apple-mobile-web-app-capable" content="yes">
-<meta name="apple-mobile-web-app-status-bar-style" content="black">
+<title>Fashion AI OS</title>
 
 <style>
 
 *{
 box-sizing:border-box;
+-webkit-tap-highlight-color:transparent;
 }
 
 body{
 margin:0;
 padding:0;
-background:#f4f7f6;
+background:#f5f7fa;
 font-family:sans-serif;
 color:#333;
 padding-bottom:120px;
 }
 
 .container{
-max-width:1200px;
+max-width:900px;
 margin:auto;
 padding:16px;
 }
@@ -34,8 +32,8 @@ padding:16px;
 .card{
 background:#fff;
 border-radius:18px;
-padding:20px;
-margin-top:18px;
+padding:18px;
+margin-top:16px;
 box-shadow:0 4px 14px rgba(0,0,0,0.08);
 }
 
@@ -47,50 +45,77 @@ color:#2c3e50;
 
 h2{
 margin-top:0;
+font-size:20px;
 border-left:6px solid #27ae60;
 padding-left:10px;
-color:#2c3e50;
 }
 
 input,
-select,
-button,
-textarea{
+button{
 width:100%;
-padding:14px;
+padding:15px;
 margin-top:10px;
-border-radius:12px;
-border:1px solid #ccc;
+border:none;
+border-radius:14px;
 font-size:16px;
 }
 
+input{
+border:1px solid #ccc;
+}
+
 button{
-background:#27ae60;
-color:#fff;
 font-weight:bold;
-border:none;
 cursor:pointer;
+color:#fff;
 }
 
-button:hover{
-opacity:0.92;
+button:disabled{
+opacity:0.45;
+cursor:not-allowed;
 }
 
-.mode-grid{
+.capture-btn{
+background:#8e44ad;
+}
+
+.ai-btn{
+background:#3498db;
+}
+
+.search-btn{
+background:#27ae60;
+}
+
+.save-btn{
+background:#e67e22;
+}
+
+.clear-btn{
+background:#e74c3c;
+}
+
+.grid{
 display:grid;
 grid-template-columns:1fr 1fr;
 gap:10px;
-margin-top:10px;
+}
+
+.preview{
+width:100%;
+border-radius:14px;
+margin-top:14px;
+display:none;
 }
 
 .result{
-margin-top:20px;
-background:#fff;
-border-radius:14px;
+margin-top:18px;
 padding:18px;
+border-radius:14px;
 line-height:1.8;
-overflow-wrap:break-word;
 white-space:pre-wrap;
+overflow-wrap:break-word;
+background:#fff;
 }
 
 .good{
@@ -106,22 +131,6 @@ border-left:8px solid #3498db;
 background:#eef7ff;
 }
 
-table{
-width:100%;
-border-collapse:collapse;
-margin-top:15px;
-}
-
-th,td{
-border:1px solid #ddd;
-padding:10px;
-}
-
-th{
-background:#2c3e50;
-color:#fff;
-}
-
 .link-grid{
 display:grid;
 grid-template-columns:1fr 1fr;
@@ -131,56 +140,19 @@ margin-top:18px;
 
 .link-btn{
 display:block;
-text-align:center;
 padding:12px;
+text-align:center;
 border-radius:10px;
-text-decoration:none;
 background:#34495e;
 color:#fff;
+text-decoration:none;
 font-weight:bold;
 }
 
-.preview{
-width:100%;
+#reader{
+margin-top:15px;
+overflow:hidden;
 border-radius:14px;
-margin-top:16px;
-display:none;
-}
-
-.bottom-nav{
-position:fixed;
-bottom:0;
-left:0;
-width:100%;
-background:#fff;
-display:grid;
-grid-template-columns:repeat(5,1fr);
-padding:10px;
-box-shadow:0 -4px 12px rgba(0,0,0,0.12);
-z-index:999;
-}
-
-.nav-btn{
-background:#ecf0f1;
-color:#333;
-padding:10px;
-border-radius:12px;
-font-size:13px;
-}
-
-.camera-main{
-position:fixed;
-bottom:72px;
-right:20px;
-width:70px;
-height:70px;
-border-radius:50%;
-font-size:28px;
-background:#27ae60;
-color:#fff;
-border:none;
-box-shadow:0 6px 18px rgba(0,0,0,0.25);
-z-index:9999;
 }
 
 .history-item{
@@ -188,7 +160,24 @@ padding:12px;
 border-bottom:1px solid #ddd;
 }
 
-small{
+.camera-float{
+position:fixed;
+bottom:25px;
+right:25px;
+width:72px;
+height:72px;
+border-radius:50%;
+background:#27ae60;
+color:#fff;
+font-size:30px;
+border:none;
+box-shadow:0 6px 18px rgba(0,0,0,0.25);
+z-index:999;
+}
+
+.step{
+margin-top:8px;
+font-size:14px;
 color:#666;
 }
 
@@ -202,93 +191,65 @@ color:#666;
 
 <div class="card">
 
-<h1>Universal AI Life OS</h1>
+<h1>Fashion AI OS</h1>
 
 <p>
-AI × OCR × 商品解析 × ブランド解析 × 食品解析 × ライフログ
+服・ブランド・型番解析特化
 </p>
 
 </div>
 
-<div class="card">
-
-<h2>モード選択</h2>
-
-<select id="mainMode" onchange="changeMode()">
-
-<option value="fashion">
-Fashion Mode
-</option>
-
-<option value="food">
-Food Mode
-</option>
-
-<option value="universal">
-Universal Search
-</option>
-
-</select>
-
-<div id="modeDescription" style="margin-top:10px;">
-ファッション解析モード
-</div>
-
-</div>
+<!-- STEP1 -->
 
 <div class="card">
 
-<h2>検索 / AI解析</h2>
+<h2>STEP1：入力</h2>
+
+<div class="step">
+まず画像取得または検索ワード入力
+</div>
 
 <input
 type="text"
 id="searchInput"
-placeholder="ブランド / 商品名 / 型番">
+placeholder="ブランド / 型番 / 商品名">
 
-<div class="mode-grid">
+<div class="grid">
 
-<button onclick="normalSearch()">
-通常検索
+<button
+class="capture-btn"
+onclick="captureCamera()">
+
+📷 今撮る
+
 </button>
 
-<button onclick="aiReview()">
-AI解析
-</button>
+<button
+class="capture-btn"
+onclick="pickImage()">
 
-</div>
+🖼 保存済み画像
 
-<div class="mode-grid">
-
-<button onclick="startBarcodeScanner()">
-バーコード
-</button>
-
-<button onclick="captureCamera()">
-カメラ撮影
 </button>
 
 </div>
 
-<div class="mode-grid">
+<div class="grid">
 
-<button onclick="pickImage()">
-画像選択
+<button
+class="capture-btn"
+onclick="startBarcodeScanner()">
+
+📦 バーコード読む
+
 </button>
 
-<button onclick="readOCR()">
-OCR解析
-</button>
+<button
+class="search-btn"
+onclick="normalSearch()">
 
-</div>
+🔎 EC検索
 
-<div class="mode-grid">
-
-<button onclick="analyzeImage()">
-AI画像解析
-</button>
-
-<button onclick="saveHistory()">
-履歴保存
 </button>
 
 </div>
@@ -297,12 +258,57 @@ AI画像解析
 type="file"
 id="imageInput"
 accept="image/*"
-capture="environment"
 style="display:none;">
 
-<div id="reader" style="width:100%;margin-top:20px;"></div>
+<div id="reader"></div>
 
-<img id="preview" class="preview">
+<img
+id="preview"
+class="preview">
+
+</div>
+
+<!-- STEP2 -->
+
+<div class="card">
+
+<h2>STEP2：解析</h2>
+
+<div class="step">
+画像選択後に使用
+</div>
+
+<div class="grid">
+
+<button
+id="ocrBtn"
+class="ai-btn"
+onclick="readOCR()"
+disabled>
+
+🔤 タグ/文字を読む
+
+</button>
+
+<button
+id="aiBtn"
+class="ai-btn"
+onclick="analyzeImage()"
+disabled>
+
+🧠 AIで商品特定
+
+</button>
+
+</div>
+
+</div>
+
+<!-- RESULT -->
+
+<div class="card">
+
+<h2>結果</h2>
 
 <div
 id="result"
@@ -312,7 +318,29 @@ class="result good">
 
 </div>
 
+<div class="grid">
+
+<button
+class="save-btn"
+onclick="saveHistory()">
+
+⭐ 保存
+
+</button>
+
+<button
+class="clear-btn"
+onclick="clearAll()">
+
+🗑 オールクリア
+
+</button>
+
 </div>
+
+</div>
+
+<!-- HISTORY -->
 
 <div class="card">
 
@@ -329,95 +357,36 @@ class="result good">
 </div>
 
 <button
-class="camera-main"
+class="camera-float"
 onclick="captureCamera()">
 
 📷
 
 </button>
 
-<div class="bottom-nav">
-
-<button class="nav-btn" onclick="scrollTopPage()">
-Home
-</button>
-
-<button class="nav-btn" onclick="focusSearch()">
-Search
-</button>
-
-<button class="nav-btn" onclick="captureCamera()">
-Camera
-</button>
-
-<button class="nav-btn" onclick="loadHistory()">
-History
-</button>
-
-<button class="nav-btn" onclick="location.reload()">
-Reset
-</button>
-
-</div>
-
 <script src="https://unpkg.com/html5-qrcode"></script>
 <script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
 
 <script>
 
-// =======================================
+// ======================================
 // Worker URL
-// =======================================
+// ======================================
 
 const WORKER_URL =
 "https://chanfana-openapi-template.big-light-0903.workers.dev";
 
-// =======================================
-// Mode
-// =======================================
+// ======================================
+// State
+// ======================================
 
-let currentMode = "fashion";
+let currentScanner = null;
 
-// =======================================
-// Mode Change
-// =======================================
-
-window.changeMode = function(){
-
-currentMode =
-document.getElementById("mainMode").value;
-
-const area =
-document.getElementById("modeDescription");
-
-if(currentMode === "fashion"){
-
-area.innerHTML =
-"タグOCR・ブランド解析・価格調査";
-
-}
-
-else if(currentMode === "food"){
-
-area.innerHTML =
-"PFC・栄養・食品解析";
-
-}
-
-else{
-
-area.innerHTML =
-"万能AI検索モード";
-
-}
-
-}
-
-// =======================================
+// ======================================
 // Gemini
-// =======================================
+// ======================================
 
-async function askGemini(prompt, imageData=null, mimeType=null){
+async function askGemini(prompt, base64=null, mimeType=null){
 
 const parts = [
 {
@@ -425,18 +394,19 @@ text:prompt
 }
 ];
 
-if(imageData){
+if(base64){
 
 parts.push({
 inlineData:{
 mimeType:mimeType,
-data:imageData
+data:base64
 }
 });
 
 }
 
-const response = await fetch(
+const response =
+await fetch(
 WORKER_URL,
 {
 method:"POST",
@@ -465,12 +435,15 @@ maxOutputTokens:4096
 }
 );
 
-const data = await response.json();
+const data =
+await response.json();
 
 if(data.error){
+
 throw new Error(
-data.error.message || "Gemini Error"
+data.error.message
 );
+
 }
 
 const text =
@@ -479,18 +452,22 @@ data?.candidates?.[0]
 ?.text;
 
 if(!text){
-throw new Error("AI応答なし");
+
+throw new Error(
+"AI解析失敗"
+);
+
 }
 
 return text;
 
 }
 
-// =======================================
+// ======================================
 // Search
-// =======================================
+// ======================================
 
-window.normalSearch = async function(){
+window.normalSearch = function(){
 
 const keyword =
 document.getElementById("searchInput")
@@ -498,17 +475,17 @@ document.getElementById("searchInput")
 .trim();
 
 if(!keyword){
-alert("入力してください");
+
+alert("検索ワード入力");
+
 return;
+
 }
 
-showLoading("検索中...");
+showResult(`
 
-let links = "";
+<h2>${keyword}</h2>
 
-if(currentMode === "fashion"){
-
-links = `
 <div class="link-grid">
 
 <a
@@ -528,20 +505,6 @@ BUYMA
 <a
 class="link-btn"
 target="_blank"
-href="https://www.amazon.co.jp/s?k=${keyword}">
-Amazon
-</a>
-
-<a
-class="link-btn"
-target="_blank"
-href="https://search.rakuten.co.jp/search/mall/${keyword}/">
-楽天
-</a>
-
-<a
-class="link-btn"
-target="_blank"
 href="https://jp.mercari.com/search?keyword=${keyword}">
 メルカリ
 </a>
@@ -549,63 +512,8 @@ href="https://jp.mercari.com/search?keyword=${keyword}">
 <a
 class="link-btn"
 target="_blank"
-href="https://www.google.com/search?q=${keyword}">
-Google
-</a>
-
-</div>
-`;
-
-}
-
-else if(currentMode === "food"){
-
-links = `
-<div class="link-grid">
-
-<a
-class="link-btn"
-target="_blank"
-href="https://www.amazon.co.jp/s?k=${keyword}">
-Amazon
-</a>
-
-<a
-class="link-btn"
-target="_blank"
 href="https://search.rakuten.co.jp/search/mall/${keyword}/">
 楽天
-</a>
-
-<a
-class="link-btn"
-target="_blank"
-href="https://cookpad.com/search/${keyword}">
-Cookpad
-</a>
-
-<a
-class="link-btn"
-target="_blank"
-href="https://www.google.com/search?q=${keyword}">
-Google
-</a>
-
-</div>
-`;
-
-}
-
-else{
-
-links = `
-<div class="link-grid">
-
-<a
-class="link-btn"
-target="_blank"
-href="https://www.google.com/search?q=${keyword}">
-Google
 </a>
 
 <a
@@ -618,172 +526,19 @@ Amazon
 <a
 class="link-btn"
 target="_blank"
-href="https://search.rakuten.co.jp/search/mall/${keyword}/">
-楽天
+href="https://www.google.com/search?q=${keyword}">
+Google
 </a>
 
 </div>
-`;
-
-}
-
-showResult(`
-
-<h2>${keyword}</h2>
-
-<p>
-検索リンク生成完了
-</p>
-
-${links}
 
 `);
 
 }
 
-// =======================================
-// AI Review
-// =======================================
-
-window.aiReview = async function(){
-
-const keyword =
-document.getElementById("searchInput")
-.value;
-
-if(!keyword){
-alert("入力してください");
-return;
-}
-
-showLoading("AI解析中...");
-
-let prompt = "";
-
-if(currentMode === "fashion"){
-
-prompt = `
-
-商品「${keyword}」を解析。
-
-・ブランド
-・カテゴリ
-・特徴
-・価格帯
-・人気理由
-・おすすめ用途
-・類似ブランド
-・ZOZO検索向きワード
-・BUYMA検索向きワード
-
-`;
-
-}
-
-else if(currentMode === "food"){
-
-prompt = `
-
-食品「${keyword}」を解析。
-
-・PFC
-・カロリー
-・減量向きか
-・増量向きか
-・おすすめの食べ方
-・注意点
-・総合評価
-
-`;
-
-}
-
-else{
-
-prompt = `
-
-商品「${keyword}」を万能解析。
-
-・概要
-・用途
-・価格感
-・特徴
-・注意点
-・検索向きキーワード
-
-`;
-
-}
-
-try{
-
-const result =
-await askGemini(prompt);
-
-showAI(result);
-
-}catch(err){
-
-showError(err.message);
-
-}
-
-}
-
-// =======================================
-// Barcode
-// =======================================
-
-window.startBarcodeScanner = async function(){
-
-const reader =
-document.getElementById("reader");
-
-reader.innerHTML = "";
-
-const scanner =
-new Html5Qrcode("reader");
-
-scanner.start(
-
-{ facingMode:"environment" },
-
-{
-fps:15,
-qrbox:{
-width:280,
-height:280
-},
-aspectRatio:1,
-disableFlip:false
-},
-
-async(decodedText)=>{
-
-scanner.stop();
-
-document.getElementById("searchInput")
-.value = decodedText;
-
-showLoading("バーコード解析中...");
-
-normalSearch();
-
-}
-
-).catch(err=>{
-
-showError(
-"カメラ許可またはHTTPS確認"
-);
-
-});
-
-}
-
-// =======================================
+// ======================================
 // Camera
-// =======================================
+// ======================================
 
 window.captureCamera = function(){
 
@@ -799,30 +554,42 @@ input.click();
 
 }
 
-// =======================================
-// Image Pick
-// =======================================
+// ======================================
+// Pick Image
+// ======================================
 
 window.pickImage = function(){
 
-const input =
+const oldInput =
 document.getElementById("imageInput");
 
-input.removeAttribute("capture");
+const newInput =
+oldInput.cloneNode(true);
 
-input.click();
+newInput.removeAttribute("capture");
+
+oldInput.parentNode.replaceChild(
+newInput,
+oldInput
+);
+
+newInput.click();
+
+newInput.addEventListener(
+"change",
+handleImagePreview
+);
 
 }
 
-// =======================================
+// ======================================
 // Preview
-// =======================================
+// ======================================
 
-document
-.getElementById("imageInput")
-.addEventListener("change",(e)=>{
+function handleImagePreview(e){
 
-const file = e.target.files[0];
+const file =
+e.target.files[0];
 
 if(!file) return;
 
@@ -836,37 +603,126 @@ preview.src = url;
 
 preview.style.display = "block";
 
+enableAnalyzeButtons();
+
+}
+
+document
+.getElementById("imageInput")
+.addEventListener(
+"change",
+handleImagePreview
+);
+
+// ======================================
+// Enable Buttons
+// ======================================
+
+function enableAnalyzeButtons(){
+
+document
+.getElementById("ocrBtn")
+.disabled = false;
+
+document
+.getElementById("aiBtn")
+.disabled = false;
+
+}
+
+// ======================================
+// Barcode
+// ======================================
+
+window.startBarcodeScanner =
+async function(){
+
+clearReader();
+
+const scanner =
+new Html5Qrcode("reader");
+
+currentScanner = scanner;
+
+scanner.start(
+
+{
+facingMode:"environment"
+},
+
+{
+fps:10,
+qrbox:{
+width:250,
+height:250
+}
+},
+
+async(decodedText)=>{
+
+await scanner.stop();
+
+await scanner.clear();
+
+clearReader();
+
+document
+.getElementById("searchInput")
+.value = decodedText;
+
+normalSearch();
+
+}
+
+).catch(err=>{
+
+showError(
+"カメラ起動失敗"
+);
+
 });
 
-// =======================================
-// OCR
-// =======================================
+}
 
-window.readOCR = async function(){
+// ======================================
+// OCR
+// ======================================
+
+window.readOCR =
+async function(){
 
 const file =
 document.getElementById("imageInput")
 .files[0];
 
 if(!file){
-alert("画像選択");
+
+alert("画像なし");
+
 return;
+
 }
 
-showLoading("OCR解析中...");
+showLoading(
+"OCR解析中..."
+);
 
 try{
 
 const result =
 await Tesseract.recognize(
 file,
-"eng+jpn",
-{
-logger:m=>console.log(m)
-}
+"jpn+eng"
 );
 
-showAI(result.data.text);
+const text =
+result.data.text;
+
+document
+.getElementById("searchInput")
+.value = text;
+
+showAI(text);
 
 }catch(err){
 
@@ -876,85 +732,55 @@ showError(err.message);
 
 }
 
-// =======================================
-// AI Image Analyze
-// =======================================
+// ======================================
+// AI Analyze
+// ======================================
 
-window.analyzeImage = async function(){
+window.analyzeImage =
+async function(){
 
 const file =
 document.getElementById("imageInput")
 .files[0];
 
 if(!file){
-alert("画像選択");
+
+alert("画像なし");
+
 return;
+
 }
 
-showLoading("AI画像解析中...");
+showLoading(
+"AI解析中..."
+);
 
 const reader =
 new FileReader();
 
-reader.onload = async function(){
+reader.onload =
+async function(){
+
+try{
 
 const base64 =
-reader.result.split(",")[1];
+reader.result
+.split(",")[1];
 
-let prompt = "";
-
-if(currentMode === "fashion"){
-
-prompt = `
+const prompt = `
 
 画像の商品を解析。
+
+以下を出力。
 
 ・ブランド
 ・商品カテゴリ
 ・型番候補
+・特徴
 ・価格帯
-・特徴
-・ZOZO検索ワード
-・BUYMA検索ワード
-・楽天検索ワード
+・検索向きワード
 
 `;
-
-}
-
-else if(currentMode === "food"){
-
-prompt = `
-
-画像の食品を解析。
-
-・食品名
-・PFC
-・推定カロリー
-・減量向きか
-・特徴
-
-`;
-
-}
-
-else{
-
-prompt = `
-
-画像の商品を万能解析。
-
-・商品名候補
-・カテゴリ
-・特徴
-・用途
-・価格帯
-
-`;
-
-}
-
-try{
 
 const result =
 await askGemini(
@@ -977,33 +803,45 @@ reader.readAsDataURL(file);
 
 }
 
-// =======================================
-// Save History
-// =======================================
+// ======================================
+// Save
+// ======================================
 
 window.saveHistory = function(){
 
-const result =
-document.getElementById("result")
+const text =
+document
+.getElementById("result")
 .innerText;
+
+if(
+text === "待機中..."
+){
+
+alert("保存内容なし");
+
+return;
+
+}
 
 const history =
 JSON.parse(
-localStorage.getItem("ai_history") || "[]"
+localStorage.getItem(
+"fashion_history"
+) || "[]"
 );
 
 history.unshift({
 
-mode:currentMode,
+date:new Date()
+.toLocaleString(),
 
-text:result,
-
-date:new Date().toLocaleString()
+text:text
 
 });
 
 localStorage.setItem(
-"ai_history",
+"fashion_history",
 JSON.stringify(history)
 );
 
@@ -1013,36 +851,43 @@ loadHistory();
 
 }
 
-// =======================================
+// ======================================
 // Load History
-// =======================================
+// ======================================
 
 window.loadHistory = function(){
 
 const history =
 JSON.parse(
-localStorage.getItem("ai_history") || "[]"
+localStorage.getItem(
+"fashion_history"
+) || "[]"
 );
 
 const area =
-document.getElementById("historyArea");
+document.getElementById(
+"historyArea"
+);
 
 if(!history.length){
 
-area.innerHTML = "履歴なし";
+area.innerHTML =
+"履歴なし";
 
 return;
+
 }
 
-area.innerHTML = history.map(item=>`
+area.innerHTML =
+history.map(item=>`
 
 <div class="history-item">
 
-<b>${item.mode}</b><br>
+<b>${item.date}</b>
 
-<small>${item.date}</small>
-
-<p>${item.text.substring(0,200)}</p>
+<p>
+${item.text.substring(0,180)}
+</p>
 
 </div>
 
@@ -1050,83 +895,137 @@ area.innerHTML = history.map(item=>`
 
 }
 
-// =======================================
+// ======================================
+// Clear
+// ======================================
+
+window.clearAll =
+async function(){
+
+document
+.getElementById("searchInput")
+.value = "";
+
+document
+.getElementById("result")
+.innerHTML = "待機中...";
+
+document
+.getElementById("result")
+.className = "result good";
+
+const preview =
+document
+.getElementById("preview");
+
+preview.src = "";
+
+preview.style.display =
+"none";
+
+document
+.getElementById("ocrBtn")
+.disabled = true;
+
+document
+.getElementById("aiBtn")
+.disabled = true;
+
+const input =
+document
+.getElementById("imageInput");
+
+input.value = "";
+
+clearReader();
+
+if(currentScanner){
+
+try{
+
+await currentScanner.stop();
+await currentScanner.clear();
+
+}catch(e){}
+
+currentScanner = null;
+
+}
+
+}
+
+// ======================================
+// Reader Clear
+// ======================================
+
+function clearReader(){
+
+document
+.getElementById("reader")
+.innerHTML = "";
+
+}
+
+// ======================================
 // UI
-// =======================================
+// ======================================
 
 function showLoading(text){
 
-const area =
-document.getElementById("result");
+const result =
+document
+.getElementById("result");
 
-area.className =
+result.className =
 "result good";
 
-area.innerHTML = text;
+result.innerHTML = text;
 
 }
 
 function showError(text){
 
-const area =
-document.getElementById("result");
+const result =
+document
+.getElementById("result");
 
-area.className =
+result.className =
 "result bad";
 
-area.innerHTML = text;
+result.innerHTML = text;
 
 }
 
 function showAI(text){
 
-const area =
-document.getElementById("result");
+const result =
+document
+.getElementById("result");
 
-area.className =
+result.className =
 "result ai";
 
-area.innerHTML =
+result.innerHTML =
 text.replace(/\n/g,"<br>");
 
 }
 
 function showResult(html){
 
-const area =
-document.getElementById("result");
+const result =
+document
+.getElementById("result");
 
-area.className =
+result.className =
 "result good";
 
-area.innerHTML = html;
+result.innerHTML = html;
 
 }
 
-// =======================================
-// Nav
-// =======================================
-
-window.scrollTopPage = function(){
-
-window.scrollTo({
-top:0,
-behavior:"smooth"
-});
-
-}
-
-window.focusSearch = function(){
-
-document
-.getElementById("searchInput")
-.focus();
-
-}
-
-// =======================================
+// ======================================
 // Init
-// =======================================
+// ======================================
 
 loadHistory();
 

@@ -130,7 +130,7 @@ button:hover{
 
 .history-card img{
     width:100%;
-    max-width:200px;
+    max-width:220px;
     border-radius:10px;
     margin-top:10px;
 }
@@ -138,6 +138,16 @@ button:hover{
 .small{
     font-size:12px;
     color:#666;
+}
+
+.loading{
+    animation:pulse 1s infinite;
+}
+
+@keyframes pulse{
+    0%{opacity:1;}
+    50%{opacity:0.5;}
+    100%{opacity:1;}
 }
 
 </style>
@@ -151,10 +161,10 @@ button:hover{
 <h1>AI Fashion Search OS Ultimate</h1>
 
 <p>
-服・タグ・型番・ブランドをAI解析して検索＆保存する万能ツール
+画像からブランド・商品をAI解析して検索＆保存
 </p>
 
-<h2>① 画像検索</h2>
+<h2>① 商品解析</h2>
 
 <div class="upload-buttons">
 
@@ -168,6 +178,7 @@ button:hover{
 
 </div>
 
+<!-- カメラ -->
 <input
     type="file"
     id="cameraInput"
@@ -176,6 +187,7 @@ button:hover{
     style="display:none"
 >
 
+<!-- ギャラリー -->
 <input
     type="file"
     id="galleryInput"
@@ -196,9 +208,17 @@ button:hover{
 
 <h2>② 保存履歴</h2>
 
-<button onclick="loadHistory()">
-履歴読み込み
-</button>
+<div class="upload-buttons">
+
+    <button onclick="loadHistory()">
+        履歴表示
+    </button>
+
+    <button onclick="clearHistory()">
+        履歴削除
+    </button>
+
+</div>
 
 <div id="historyArea"></div>
 
@@ -215,7 +235,7 @@ const API_KEY = "AIzaSyB_AROtYa2U15rlIwaW9IDzglmlqahJ1ac";
 const MODEL = "gemini-2.5-flash";
 
 // =================================================
-// カメラ
+// カメラ起動
 // =================================================
 
 function openCamera(){
@@ -227,7 +247,7 @@ function openCamera(){
 }
 
 // =================================================
-// ギャラリー
+// ギャラリー起動
 // =================================================
 
 function openGallery(){
@@ -264,7 +284,7 @@ async function handleImage(event){
     }
 
     // =========================
-    // プレビュー
+    // 画像プレビュー
     // =========================
 
     const preview =
@@ -282,7 +302,7 @@ async function handleImage(event){
 
     document.getElementById("searchResult")
     .innerHTML = `
-        <div class="result normal">
+        <div class="result normal loading">
             AI解析中...
         </div>
     `;
@@ -290,11 +310,11 @@ async function handleImage(event){
     try{
 
         // =========================
-        // Base64
+        // 画像圧縮
         // =========================
 
-        const base64 =
-            await fileToBase64(file);
+        const compressedBase64 =
+            await compressImage(file);
 
         // =========================
         // Gemini API
@@ -302,7 +322,9 @@ async function handleImage(event){
 
         const response =
             await fetch(
+
                 `https://generativelanguage.googleapis.com/v1beta/models/${MODEL}:generateContent?key=${API_KEY}`,
+
                 {
 
                     method:"POST",
@@ -315,6 +337,8 @@ async function handleImage(event){
 
                         contents:[{
 
+                            role:"user",
+
                             parts:[
 
                                 {
@@ -322,7 +346,7 @@ async function handleImage(event){
                                     text:`
                                     この画像を解析してください。
 
-                                    以下を可能な限り推定してください。
+                                    推定できる内容：
 
                                     ・ブランド名
                                     ・商品名
@@ -330,13 +354,11 @@ async function handleImage(event){
                                     ・型番
                                     ・カラー
                                     ・特徴
-                                    ・定価予想
+                                    ・価格帯
                                     ・中古相場
-                                    ・検索用キーワード
+                                    ・検索キーワード
 
-                                    最後に
-                                    「検索キーワード」
-                                    を必ず出力してください。
+                                    不明な場合は「不明」と記載してください。
                                     `
 
                                 },
@@ -344,8 +366,8 @@ async function handleImage(event){
                                 {
 
                                     inlineData:{
-                                        mimeType:file.type,
-                                        data:base64
+                                        mimeType:"image/jpeg",
+                                        data:compressedBase64
                                     }
 
                                 }
@@ -357,21 +379,50 @@ async function handleImage(event){
                     })
 
                 }
+
             );
+
+        // =========================
+        // JSON
+        // =========================
 
         const data =
             await response.json();
 
-        console.log(data);
-
-        const text =
-            data.candidates?.[0]
-            ?.content?.parts?.[0]
-            ?.text
-            || "解析失敗";
+        console.log("Gemini Response:",data);
 
         // =========================
-        // 検索リンク
+        // APIエラー
+        // =========================
+
+        if(data.error){
+
+            throw new Error(
+                data.error.message
+            );
+
+        }
+
+        // =========================
+        // AI応答取得
+        // =========================
+
+        const text =
+            data?.candidates?.[0]
+            ?.content?.parts
+            ?.map(part => part.text)
+            ?.join("\n");
+
+        if(!text){
+
+            throw new Error(
+                "AI応答なし"
+            );
+
+        }
+
+        // =========================
+        // キーワード
         // =========================
 
         const keyword =
@@ -471,9 +522,12 @@ async function handleImage(event){
 
                 <h2>AI解析エラー</h2>
 
-                <p>
+                <div style="
+                    white-space:pre-wrap;
+                    line-height:1.8;
+                ">
                     ${error.message}
-                </p>
+                </div>
 
             </div>
 
@@ -484,10 +538,10 @@ async function handleImage(event){
 }
 
 // =================================================
-// Base64
+// 画像圧縮
 // =================================================
 
-function fileToBase64(file){
+function compressImage(file){
 
     return new Promise((resolve,reject)=>{
 
@@ -496,13 +550,72 @@ function fileToBase64(file){
 
         reader.readAsDataURL(file);
 
-        reader.onload = ()=>{
+        reader.onload = function(event){
 
-            const result =
-                reader.result
-                .split(",")[1];
+            const img =
+                new Image();
 
-            resolve(result);
+            img.src =
+                event.target.result;
+
+            img.onload = function(){
+
+                const canvas =
+                    document.createElement("canvas");
+
+                const maxSize = 1200;
+
+                let width = img.width;
+                let height = img.height;
+
+                if(width > height){
+
+                    if(width > maxSize){
+
+                        height *= maxSize / width;
+                        width = maxSize;
+
+                    }
+
+                }else{
+
+                    if(height > maxSize){
+
+                        width *= maxSize / height;
+                        height = maxSize;
+
+                    }
+
+                }
+
+                canvas.width = width;
+                canvas.height = height;
+
+                const ctx =
+                    canvas.getContext("2d");
+
+                ctx.drawImage(
+                    img,
+                    0,
+                    0,
+                    width,
+                    height
+                );
+
+                const compressed =
+                    canvas
+                    .toDataURL(
+                        "image/jpeg",
+                        0.7
+                    )
+                    .split(",")[1];
+
+                resolve(compressed);
+
+            };
+
+            img.onerror =
+                error => reject(error);
 
         };
 
@@ -533,6 +646,11 @@ function saveHistory(text,image){
         date:new Date().toLocaleString()
 
     });
+
+    // 50件制限
+    if(history.length > 50){
+        history.pop();
+    }
 
     localStorage.setItem(
         "fashion_history",
@@ -598,6 +716,27 @@ function loadHistory(){
         area.appendChild(div);
 
     });
+
+}
+
+// =================================================
+// 履歴削除
+// =================================================
+
+function clearHistory(){
+
+    if(confirm("履歴を削除しますか？")){
+
+        localStorage.removeItem(
+            "fashion_history"
+        );
+
+        document.getElementById("historyArea")
+        .innerHTML = "";
+
+        alert("削除しました");
+
+    }
 
 }
 

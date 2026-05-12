@@ -1,10 +1,25 @@
-```html
+
 <!DOCTYPE html>
 <html lang="ja">
 <head>
 
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+<meta
+name="viewport"
+content="width=device-width,initial-scale=1.0">
+
+<meta
+name="theme-color"
+content="#27ae60">
+
+<meta
+name="apple-mobile-web-app-capable"
+content="yes">
+
+<meta
+name="mobile-web-app-capable"
+content="yes">
 
 <title>Fashion AI Lens</title>
 
@@ -395,12 +410,13 @@ onclick="captureCamera()">
 </button>
 
 <script src="https://unpkg.com/html5-qrcode"></script>
-<script src="https://cdn.jsdelivr.net/npm/tesseract.js@5/dist/tesseract.min.js"></script>
+
+<script src="https://unpkg.com/tesseract.js@4/dist/tesseract.min.js"></script>
 
 <script>
 
 const WORKER_URL =
-"https://YOUR-WORKER.workers.dev";
+"https://chanfana-openapi-template.big-light-0903.workers.dev";
 
 let currentScanner = null;
 
@@ -452,9 +468,9 @@ parts:parts
 ],
 
 generationConfig:{
-temperature:0.7,
-topP:0.95,
-topK:40,
+temperature:0.6,
+topP:0.9,
+topK:32,
 maxOutputTokens:2048
 }
 
@@ -463,13 +479,21 @@ maxOutputTokens:2048
 }
 );
 
+if(!response.ok){
+
+throw new Error(
+"Worker通信失敗"
+);
+
+}
+
 const data =
 await response.json();
 
 if(data.error){
 
 throw new Error(
-data.error.message
+data.error
 );
 
 }
@@ -481,8 +505,10 @@ data?.candidates?.[0]
 
 if(!text){
 
+console.log(data);
+
 throw new Error(
-"AI解析失敗"
+"Gemini応答なし"
 );
 
 }
@@ -492,7 +518,7 @@ return text;
 }
 
 // ======================================
-// Image Compress
+// Compress
 // ======================================
 
 async function compressImage(file){
@@ -514,7 +540,7 @@ img.onload = ()=>{
 const canvas =
 document.createElement("canvas");
 
-const maxSize = 1200;
+const maxSize = 900;
 
 let width = img.width;
 let height = img.height;
@@ -554,10 +580,12 @@ height
 );
 
 resolve(
+
 canvas.toDataURL(
 "image/jpeg",
-0.7
+0.55
 )
+
 );
 
 };
@@ -599,43 +627,43 @@ showResult(`
 <a
 class="link-btn"
 target="_blank"
-href="https://zozo.jp/search/?p_keyv=${q}">
-ZOZO
+href="https://www.google.com/search?q=site:zozo.jp+${q}">
+ZOZO検索
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://www.buyma.com/r/_${q}/">
-BUYMA
+href="https://www.google.com/search?q=site:buyma.com+${q}">
+BUYMA検索
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://jp.mercari.com/search?keyword=${q}">
-メルカリ
+href="https://www.google.com/search?q=site:jp.mercari.com+${q}">
+メルカリ検索
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://search.rakuten.co.jp/search/mall/${q}/">
-楽天
+href="https://www.google.com/search?q=site:rakuten.co.jp+${q}">
+楽天検索
 </a>
 
 <a
 class="link-btn"
 target="_blank"
-href="https://www.amazon.co.jp/s?k=${q}">
-Amazon
+href="https://www.google.com/search?q=site:amazon.co.jp+${q}">
+Amazon検索
 </a>
 
 <a
 class="link-btn"
 target="_blank"
 href="https://www.google.com/search?q=${q}">
-Google
+Google検索
 </a>
 
 </div>
@@ -685,24 +713,44 @@ input.click();
 // Preview
 // ======================================
 
-function handleImagePreview(e){
+async function handleImagePreview(e){
 
 const file =
-e.target.files[0];
+e.target.files?.[0];
 
-if(!file) return;
+if(!file){
 
-const url =
-URL.createObjectURL(file);
+showError("画像取得失敗");
+
+return;
+
+}
+
+try{
 
 const preview =
 document.getElementById("preview");
+
+const url =
+URL.createObjectURL(file);
 
 preview.src = url;
 
 preview.style.display = "block";
 
 enableAnalyzeButtons();
+
+showLoading(
+"画像読み込み完了"
+);
+
+}catch(err){
+
+showError(
+"画像表示失敗：" + err.message
+);
+
+}
 
 }
 
@@ -719,17 +767,23 @@ handleImagePreview
 
 function enableAnalyzeButtons(){
 
-document
-.getElementById("ocrFastBtn")
-.disabled = false;
+[
+"ocrFastBtn",
+"ocrJpnBtn",
+"aiBtn"
 
-document
-.getElementById("ocrJpnBtn")
-.disabled = false;
+].forEach(id=>{
 
-document
-.getElementById("aiBtn")
-.disabled = false;
+const btn =
+document.getElementById(id);
+
+if(btn){
+
+btn.disabled = false;
+
+}
+
+});
 
 }
 
@@ -740,14 +794,27 @@ document
 window.startBarcodeScanner =
 async function(){
 
+try{
+
 clearReader();
+
+if(currentScanner){
+
+try{
+
+await currentScanner.stop();
+await currentScanner.clear();
+
+}catch(e){}
+
+}
 
 const scanner =
 new Html5Qrcode("reader");
 
 currentScanner = scanner;
 
-scanner.start(
+await scanner.start(
 
 {
 facingMode:"environment"
@@ -756,16 +823,19 @@ facingMode:"environment"
 {
 fps:10,
 qrbox:{
-width:250,
-height:250
+width:240,
+height:240
 }
 },
 
 async(decodedText)=>{
 
-await scanner.stop();
+try{
 
+await scanner.stop();
 await scanner.clear();
+
+}catch(e){}
 
 clearReader();
 
@@ -773,17 +843,23 @@ document
 .getElementById("searchInput")
 .value = decodedText;
 
+showLoading(
+"バーコード取得完了"
+);
+
 normalSearch();
 
 }
 
-).catch(err=>{
-
-showError(
-"カメラ起動失敗"
 );
 
-});
+}catch(err){
+
+showError(
+"バーコード起動失敗"
+);
+
+}
 
 }
 
@@ -795,7 +871,7 @@ async function runOCR(lang){
 
 const file =
 document.getElementById("imageInput")
-.files[0];
+.files?.[0];
 
 if(!file){
 
@@ -806,7 +882,17 @@ return;
 }
 
 showLoading(
-"OCR解析中..."
+
+lang === "eng"
+
+?
+
+"型番OCR解析中..."
+
+:
+
+"日本語OCR解析中...\n初回は30秒〜1分かかる場合あり"
+
 );
 
 try{
@@ -814,14 +900,30 @@ try{
 const compressed =
 await compressImage(file);
 
-const result =
-await Tesseract.recognize(
-compressed,
+const worker =
+await Tesseract.createWorker(
 lang
 );
 
+const result =
+await worker.recognize(
+compressed
+);
+
+await worker.terminate();
+
 const text =
 result.data.text;
+
+if(!text.trim()){
+
+showError(
+"OCR結果なし"
+);
+
+return;
+
+}
 
 document
 .getElementById("searchInput")
@@ -862,7 +964,7 @@ async function(){
 
 const file =
 document.getElementById("imageInput")
-.files[0];
+.files?.[0];
 
 if(!file){
 
@@ -886,16 +988,27 @@ compressed.split(",")[1];
 
 const prompt = `
 
-画像の商品を解析。
+あなたはファッション解析AI。
+
+画像の商品を可能な限り分析。
 
 以下を出力。
 
-・ブランド
-・商品カテゴリ
+・ブランド候補
+・アイテム種類
 ・型番候補
+・年代感
+・系統
 ・特徴
 ・価格帯
 ・検索向きワード
+・似ているブランド
+
+最後に：
+
+【おすすめ検索ワード】
+
+を必ず出力。
 
 `;
 
@@ -913,6 +1026,8 @@ showAI(result);
 showError(
 "AI解析失敗：" + err.message
 );
+
+console.error(err);
 
 }
 
@@ -1046,29 +1161,32 @@ document
 .className = "result good";
 
 const preview =
-document
-.getElementById("preview");
+document.getElementById("preview");
 
 preview.src = "";
 
-preview.style.display =
-"none";
+preview.style.display = "none";
 
-document
-.getElementById("ocrFastBtn")
-.disabled = true;
+[
+"ocrFastBtn",
+"ocrJpnBtn",
+"aiBtn"
 
-document
-.getElementById("ocrJpnBtn")
-.disabled = true;
+].forEach(id=>{
 
-document
-.getElementById("aiBtn")
-.disabled = true;
+const btn =
+document.getElementById(id);
+
+if(btn){
+
+btn.disabled = true;
+
+}
+
+});
 
 const input =
-document
-.getElementById("imageInput");
+document.getElementById("imageInput");
 
 input.value = "";
 
@@ -1086,6 +1204,16 @@ await currentScanner.clear();
 currentScanner = null;
 
 }
+
+showLoading("リセット完了");
+
+setTimeout(()=>{
+
+document
+.getElementById("result")
+.innerHTML = "待機中...";
+
+},600);
 
 }
 
@@ -1168,4 +1296,4 @@ loadHistory();
 
 </body>
 </html>
-```
+

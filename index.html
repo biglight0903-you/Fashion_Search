@@ -1,4 +1,4 @@
-
+```html id="c8m2vx"
 <!DOCTYPE html>
 <html lang="ja">
 <head>
@@ -84,11 +84,6 @@ button{
 font-weight:bold;
 cursor:pointer;
 color:#fff;
-}
-
-button:disabled{
-opacity:0.45;
-cursor:not-allowed;
 }
 
 .capture-btn{
@@ -197,10 +192,6 @@ font-size:14px;
 color:#666;
 }
 
-small{
-color:#777;
-}
-
 </style>
 
 </head>
@@ -226,7 +217,7 @@ color:#777;
 <h2>STEP1：入力</h2>
 
 <div class="step">
-タグ撮影 or 保存画像 or 型番入力
+タグ撮影 / 保存画像 / 型番入力
 </div>
 
 <input
@@ -296,28 +287,24 @@ class="preview">
 
 <div class="step">
 
-タグ画像ならOCR推奨。<br>
-商品画像ならAI解析推奨。
+タグ画像 → OCR推奨<br>
+商品画像 → AI解析推奨
 
 </div>
 
 <div class="grid">
 
 <button
-id="ocrFastBtn"
 class="ai-btn"
-onclick="readOCRFast()"
-disabled>
+onclick="readOCRFast()">
 
 🔤 型番OCR
 
 </button>
 
 <button
-id="ocrJpnBtn"
 class="ai-btn"
-onclick="readOCRJapanese()"
-disabled>
+onclick="readOCRJapanese()">
 
 🈯 日本語OCR
 
@@ -328,12 +315,10 @@ disabled>
 <div class="grid">
 
 <button
-id="aiBtn"
 class="ai-btn"
-onclick="analyzeImage()"
-disabled>
+onclick="analyzeImage()">
 
-🧠 AIで商品特定
+🧠 AI解析
 
 </button>
 
@@ -504,8 +489,6 @@ data?.candidates?.[0]
 ?.text;
 
 if(!text){
-
-console.log(data);
 
 throw new Error(
 "Gemini応答なし"
@@ -681,6 +664,8 @@ window.captureCamera = function(){
 const input =
 document.getElementById("imageInput");
 
+input.value = "";
+
 input.setAttribute(
 "capture",
 "environment"
@@ -701,6 +686,8 @@ window.pickImage = function(){
 const input =
 document.getElementById("imageInput");
 
+input.value = "";
+
 input.removeAttribute("capture");
 
 input.accept = "image/*";
@@ -715,6 +702,8 @@ input.click();
 
 async function handleImagePreview(e){
 
+try{
+
 const file =
 e.target.files?.[0];
 
@@ -726,19 +715,14 @@ return;
 
 }
 
-try{
-
 const preview =
 document.getElementById("preview");
 
-const url =
+preview.src =
 URL.createObjectURL(file);
 
-preview.src = url;
-
-preview.style.display = "block";
-
-enableAnalyzeButtons();
+preview.style.display =
+"block";
 
 showLoading(
 "画像読み込み完了"
@@ -760,32 +744,6 @@ document
 "change",
 handleImagePreview
 );
-
-// ======================================
-// Enable
-// ======================================
-
-function enableAnalyzeButtons(){
-
-[
-"ocrFastBtn",
-"ocrJpnBtn",
-"aiBtn"
-
-].forEach(id=>{
-
-const btn =
-document.getElementById(id);
-
-if(btn){
-
-btn.disabled = false;
-
-}
-
-});
-
-}
 
 // ======================================
 // Barcode
@@ -901,9 +859,11 @@ const compressed =
 await compressImage(file);
 
 const worker =
-await Tesseract.createWorker(
-lang
-);
+await Tesseract.createWorker();
+
+await worker.loadLanguage(lang);
+
+await worker.initialize(lang);
 
 const result =
 await worker.recognize(
@@ -1167,24 +1127,6 @@ preview.src = "";
 
 preview.style.display = "none";
 
-[
-"ocrFastBtn",
-"ocrJpnBtn",
-"aiBtn"
-
-].forEach(id=>{
-
-const btn =
-document.getElementById(id);
-
-if(btn){
-
-btn.disabled = true;
-
-}
-
-});
-
 const input =
 document.getElementById("imageInput");
 
@@ -1296,4 +1238,4 @@ loadHistory();
 
 </body>
 </html>
-
+```
